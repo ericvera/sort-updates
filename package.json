@@ -1,0 +1,41 @@
+{
+  "name": "sort-updates",
+  "version": "0.0.1",
+  "description": "A JavaScript utility library to determine updates needed to re-order an item in a sorted list.",
+  "main": "lib/sort-updates.js",
+  "scripts": {
+    "build": "babel src --out-dir lib --source-maps inline",
+    "prepare": "npm test",
+    "test": "npm run build && jest --coverage"
+  },
+  "repository": "git+https://github.com/ericvera/sort-updates.git",
+  "keywords": [
+    "sort",
+    "key",
+    "float"
+  ],
+  "author": "Eric Vera",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ericvera/sort-updates/issues"
+  },
+  "homepage": "https://github.com/ericvera/sort-updates#readme",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-jest": "^17.0.2",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-polyfill": "^6.20.0",
+    "babel-preset-es2015": "^6.18.0",
+    "jest": "^17.0.3"
+  },
+  "standard": {
+    "globals": [
+      "describe",
+      "expect",
+      "it"
+    ]
+  },
+  "dependencies": {
+    "sort-value": "^0.0.1"
+  }
+}
