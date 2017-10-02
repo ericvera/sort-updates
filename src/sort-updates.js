@@ -2,8 +2,8 @@
 
 import sortValue from 'sort-value'
 
-// Return the list of update to make to items (id and sortKey)
-export default function (insertBeforeIndex, itemToInsert, list, options) {
+// Return the list of update to make to items (key and sortValue)
+export default function (insertBeforeIndex, itemToInsert, list, options = {keyName: 'key', sortValueName: 'sortValue'}) {
   // Assumptions:
   // - list is sorted
   // - it contains all items prior to insertBeforeIndex
@@ -13,56 +13,56 @@ export default function (insertBeforeIndex, itemToInsert, list, options) {
 
   let beforeIndex = currentInsertBeforeIndex - 1
   let afterIndex = currentInsertBeforeIndex
-  let beforeKey = beforeIndex < 0 ? undefined : list[beforeIndex].sortKey
-  let afterKey = afterIndex === list.length ? undefined : list[afterIndex].sortKey
+  let beforeKey = beforeIndex < 0 ? undefined : list[beforeIndex][options.sortValueName]
+  let afterKey = afterIndex === list.length ? undefined : list[afterIndex][options.sortValueName]
 
-  newItemKey = sortValue(beforeKey, afterKey, options)
+  newItemKey = sortValue(beforeKey, afterKey)
 
   // In the most common case we get back a key so optimize for that
   if (newItemKey !== null) {
     updates.push({
-      id: itemToInsert.id,
-      sortKey: newItemKey
+      key: itemToInsert[options.keyName],
+      sortValue: newItemKey
     })
 
     return updates
   }
 
   // In the rare case where we reach the limit we need to shift items up
-  // - First update the item to insert with the current sortKey, then keep going until there is a key
+  // - First update the item to insert with the current sortValue, then keep going until there is a key
   updates.push({
-    id: itemToInsert.id,
-    sortKey: list[beforeIndex].sortKey
+    key: itemToInsert[options.keyName],
+    sortValue: list[beforeIndex][options.sortValueName]
   })
 
-  let currentIdIndex = beforeIndex
-  beforeIndex = currentIdIndex - 1
-  afterIndex = currentIdIndex
-  beforeKey = beforeIndex < 0 ? undefined : list[beforeIndex].sortKey
+  let currentkeyIndex = beforeIndex
+  beforeIndex = currentkeyIndex - 1
+  afterIndex = currentkeyIndex
+  beforeKey = beforeIndex < 0 ? undefined : list[beforeIndex][options.sortValueName]
   // Note: No need to check it at the end since in the case where at the end newItemKey will not be null
-  afterKey = list[afterIndex].sortKey
-  newItemKey = sortValue(beforeKey, afterKey, options)
+  afterKey = list[afterIndex][options.sortValueName]
+  newItemKey = sortValue(beforeKey, afterKey)
 
   // - Then starting at the before item begin shifting down until we can get a key
   while (newItemKey === null) {
-    beforeIndex = currentIdIndex - 2
-    afterIndex = currentIdIndex - 1
-    beforeKey = beforeIndex < 0 ? undefined : list[beforeIndex].sortKey
+    beforeIndex = currentkeyIndex - 2
+    afterIndex = currentkeyIndex - 1
+    beforeKey = beforeIndex < 0 ? undefined : list[beforeIndex][options.sortValueName]
     // Note: No need to check it at the end since in the case where at the end newItemKey will not be null
-    afterKey = list[afterIndex].sortKey
+    afterKey = list[afterIndex][options.sortValueName]
 
     updates.push({
-      id: list[currentIdIndex].id,
-      sortKey: afterKey
+      key: list[currentkeyIndex][options.keyName],
+      sortValue: afterKey
     })
 
-    newItemKey = sortValue(beforeKey, afterKey, options)
-    currentIdIndex--
+    newItemKey = sortValue(beforeKey, afterKey)
+    currentkeyIndex--
   }
 
   updates.push({
-    id: list[currentIdIndex].id,
-    sortKey: newItemKey
+    key: list[currentkeyIndex][options.keyName],
+    sortValue: newItemKey
   })
 
   return updates
