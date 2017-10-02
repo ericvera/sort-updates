@@ -16,27 +16,56 @@ npm install sort-updates --save
 ```
 
 ```js
-//TODO
-sortValue(after, before);
+sortUpdates(insertAtIndex, itemToInsert, list);
 ```
-Returns a value between the after and before.
+Returns an array with objects that need to be updated in order to insert an item at the specified location. 
 
+Whenever there is space (sortValues have a maximum of 25 decimal places) between the before and after, there will be a single update and the sort value for the item to insert will be approximaltely between the two items.
+
+Whenever there is no space items will be shifted until there is space.
+
+## Sample when there is space
 ```js
-//TODO
-import sortValue from 'sort-updates';
+import sortUpdates from 'sort-updates';
 
-const value = sortValue(0, 1);
+const list = [
+  { key: 'aba348f', sortValue: 0 },
+  { key: '5ba348f', sortValue: 5 }
+]
+const itemToInsert = { key: '8ba3e8f', sortValue: undefined }
+const insertAtIndex = 1
 
-console.log(value);
-// Output: 0.5
+const expectedUpdtes = 
+
+let updates = sortUpdates(insertAtIndex, itemToInsert, list)
+
+console.log(updates);
+// Output: [{ key: '8ba3e8f', sortValue: 3 }]
 ```
 
-# Input => Output
-* undefined, 0 => -1
-* 0, undefined => 1
-* 0, 1 => 0.5
-* 0, 0.5 => 0.3
-* 0, 0.1 => 0.05
+## Sample when there is no space
+```js
+import sortUpdates from 'sort-updates';
+
+const list = [
+  { key: 'aba348f', sortValue: 0 },
+  { key: '5ba348f', sortValue: 0.0000000000000000000000001 },
+  { key: '6ba348f', sortValue: 0.0000000000000000000000002 },
+  { key: '9ba348f', sortValue: 0.0000000000000000000000003 }
+]
+const itemToInsert = { key: '8ba3e8f', sortValue: undefined }
+const insertAtIndex = 3
+
+let updates = sortUpdates(insertAtIndex, itemToInsert, list)
+
+console.log(updates);
+// Output: [
+//  { key: '8ba3e8f', sortValue: 0.0000000000000000000000002 },
+//  { key: '6ba348f', sortValue: 0.0000000000000000000000001 },
+//  { key: '5ba348f', sortValue: 0 },
+//  { key: 'aba348f', sortValue: -1 }
+//]
+```
 
 # License
 [MIT](https://github.com/ericvera/sort-updates/blob/master/LICENSE)
