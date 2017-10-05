@@ -3,67 +3,71 @@
 import sortValue from 'sort-value'
 
 // Return the list of update to make to items (key and sortValue)
-export default function (insertBeforeIndex, itemToInsert, list, options = {keyName: 'key', sortValueName: 'sortValue'}) {
+export default function (insertBeforeIndex, itemToInsert, list, options = {keyName: 'id', sortValueName: 'sortValue'}) {
   // Assumptions:
   // - list is sorted
   // - it contains all items prior to insertBeforeIndex
   let updates = []
   let currentInsertBeforeIndex = insertBeforeIndex
-  let newItemKey = null
+  let newSortValue = null
 
   let beforeIndex = currentInsertBeforeIndex - 1
   let afterIndex = currentInsertBeforeIndex
-  let beforeKey = beforeIndex < 0 ? undefined : list[beforeIndex][options.sortValueName]
-  let afterKey = afterIndex === list.length ? undefined : list[afterIndex][options.sortValueName]
+  let beforeSortValue = beforeIndex < 0 ? undefined : list[beforeIndex][options.sortValueName]
+  let afterSortValue = afterIndex === list.length ? undefined : list[afterIndex][options.sortValueName]
 
-  newItemKey = sortValue(beforeKey, afterKey)
+  newSortValue = sortValue(beforeSortValue, afterSortValue)
 
   // In the most common case we get back a key so optimize for that
-  if (newItemKey !== null) {
-    updates.push({
-      key: itemToInsert[options.keyName],
-      sortValue: newItemKey
-    })
+  if (newSortValue !== null) {
+    let item = {}
+    item[options.keyName] = itemToInsert[options.keyName]
+    item[options.sortValueName] = newSortValue
+
+    updates.push(item)
 
     return updates
   }
 
   // In the rare case where we reach the limit we need to shift items up
   // - First update the item to insert with the current sortValue, then keep going until there is a key
-  updates.push({
-    key: itemToInsert[options.keyName],
-    sortValue: list[beforeIndex][options.sortValueName]
-  })
+  let item = {}
+  item[options.keyName] = itemToInsert[options.keyName]
+  item[options.sortValueName] = list[beforeIndex][options.sortValueName]
+
+  updates.push(item)
 
   let currentkeyIndex = beforeIndex
   beforeIndex = currentkeyIndex - 1
   afterIndex = currentkeyIndex
-  beforeKey = beforeIndex < 0 ? undefined : list[beforeIndex][options.sortValueName]
-  // Note: No need to check it at the end since in the case where at the end newItemKey will not be null
-  afterKey = list[afterIndex][options.sortValueName]
-  newItemKey = sortValue(beforeKey, afterKey)
+  beforeSortValue = beforeIndex < 0 ? undefined : list[beforeIndex][options.sortValueName]
+  // Note: No need to check it at the end since in the case where at the end newSortValue will not be null
+  afterSortValue = list[afterIndex][options.sortValueName]
+  newSortValue = sortValue(beforeSortValue, afterSortValue)
 
   // - Then starting at the before item begin shifting down until we can get a key
-  while (newItemKey === null) {
+  while (newSortValue === null) {
     beforeIndex = currentkeyIndex - 2
     afterIndex = currentkeyIndex - 1
-    beforeKey = beforeIndex < 0 ? undefined : list[beforeIndex][options.sortValueName]
-    // Note: No need to check it at the end since in the case where at the end newItemKey will not be null
-    afterKey = list[afterIndex][options.sortValueName]
+    beforeSortValue = beforeIndex < 0 ? undefined : list[beforeIndex][options.sortValueName]
+    // Note: No need to check it at the end since in the case where at the end newSortValue will not be null
+    afterSortValue = list[afterIndex][options.sortValueName]
 
-    updates.push({
-      key: list[currentkeyIndex][options.keyName],
-      sortValue: afterKey
-    })
+    let item = {}
+    item[options.keyName] = list[currentkeyIndex][options.keyName],
+    item[options.sortValueName] = afterSortValue
 
-    newItemKey = sortValue(beforeKey, afterKey)
+    updates.push(item)
+
+    newSortValue = sortValue(beforeSortValue, afterSortValue)
     currentkeyIndex--
   }
 
-  updates.push({
-    key: list[currentkeyIndex][options.keyName],
-    sortValue: newItemKey
-  })
+  item = {}
+  item[options.keyName] = list[currentkeyIndex][options.keyName]
+  item[options.sortValueName] = newSortValue
+
+  updates.push(item)
 
   return updates
 }
